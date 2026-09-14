@@ -1,0 +1,2980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKYDOT</title>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-panel: #111827;
+            --bg-card: #162032;
+            --bg-input: #1f293d;
+            --border-color: #27354f;
+            --accent-cyan: #00e5ff;
+            --accent-green: #00e676;
+            --accent-red: #ff5252;
+            
+            --mult-blue: #3b82f6;     
+            --mult-purple: #a855f7;   
+            --mult-pink: #ec4899;     
+
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        .dashboard-container {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+
+        .top-header {
+            display: grid;
+            grid-template-columns: 1fr;
+            align-items: center;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 6px;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+            width: 100%;
+            height: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 2px;
+            }
+            .nav-tab-btn {
+                font-size: 8px;
+                padding: 0 1px;
+            }
+        }
+
+        .nav-tab-btn {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0 2px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
+            width: 100%;
+            height: 28px;
+            line-height: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-tab-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-main);
+        }
+
+        .nav-tab-btn.active {
+            background-color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: #000;
+        }
+
+        .control-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .control-row {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 4px;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .control-row .filter-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .control-row .btn-sync {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 80px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .filter-group label {
+            font-size: 8px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .time-triplet {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+        }
+
+        .bottom-filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            align-items: flex-end;
+            border-top: 1px solid var(--border-color);
+            padding-top: 5px;
+        }
+
+        .api-controls-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            align-items: center;
+        }
+
+        .api-left-pairs {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-pair-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .api-right-row {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .api-inline-row {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .btn-submit-api {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            height: 24px;
+            line-height: 24px;
+            width: 100%;
+            padding: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-submit-api:hover {
+            opacity: 0.85;
+        }
+
+        .btn-manual-cashout {
+            background: linear-gradient(90deg, #ff5252 0%, #ff1744 100%);
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            height: 24px;
+            line-height: 24px;
+            width: 100%;
+            padding: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-manual-cashout:hover {
+            opacity: 0.9;
+        }
+
+        select, input {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            outline: none;
+            width: 100%;
+            height: 24px;
+        }
+
+        .control-row input {
+            height: 26px;
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-sync {
+            background: linear-gradient(90deg, #2dd4bf 0%, #0ea5e9 100%);
+            color: #070b14;
+            border: none;
+            font-weight: bold;
+            padding: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            width: 100%;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .control-row .btn-sync {
+            height: 26px;
+            padding: 0 8px;
+            font-size: 10px;
+        }
+
+        .btn-sync:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: bold;
+            padding: 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 24px;
+            width: 100%;
+        }
+
+        .btn-reset:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-download {
+            background-color: var(--bg-input);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-download:hover {
+            background-color: var(--accent-cyan);
+            color: #000;
+        }
+
+        .section-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .running-bet-status-bar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-main);
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .bet-status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .bet-status-row span {
+            white-space: nowrap;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .metric-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .metric-title {
+            font-size: 8px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .metric-sub {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .status-bar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .status-bar h4 {
+            margin: 0;
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .top-highest-row {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 1100px) {
+            .top-highest-row {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .highest-badge {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 3px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1px;
+            white-space: nowrap;
+        }
+
+        .highest-badge .mult {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        .highest-badge .time {
+            font-size: 6px;
+            color: #ffffff;
+        }
+
+        .latest-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .latest-section h3 {
+            margin: 0;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .latest-rows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .latest-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+        }
+
+        .latest-badge {
+            background-color: var(--bg-input);
+            border: none;
+            border-radius: 2px;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1px;
+            overflow: hidden;
+        }
+
+        .latest-badge .time {
+            font-size: 6px;
+            color: #ffffff;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .latest-badge .mult {
+            font-size: 9px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .mult-blue { color: var(--mult-blue) !important; }
+        .mult-purple { color: var(--mult-purple) !important; }
+        .mult-pink { color: var(--mult-pink) !important; }
+
+        .table-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+        .table-section h3 {
+            margin: 0;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 11px;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: bold;
+            background-color: var(--bg-input);
+        }
+
+        #viewOverview table th {
+            background-color: transparent;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.01);
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 10px;
+        }
+
+        .positive {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .negative {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        .analytics-view {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+        }
+
+        .target-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .target-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .target-card-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .target-status-badge {
+            font-size: 7px;
+            font-weight: bold;
+            padding: 1px 4px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-reached {
+            background-color: rgba(0, 230, 118, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .badge-not-reached {
+            background-color: rgba(255, 82, 82, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+
+        .target-metrics-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 10px;
+        }
+
+        .target-metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-input);
+            padding: 3px 6px;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+        }
+
+        .target-metric-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .target-metric-val {
+            font-weight: bold;
+        }
+
+        .raw-data-view {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .logs-filter-toolbar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .dual-bet-toolbar-row {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 4px;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            margin-bottom: 2px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .dual-bet-toolbar-row {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 4px;
+            }
+            .dual-bet-toolbar-row .filter-group input,
+            .dual-bet-toolbar-row .filter-group button {
+                font-size: 8px;
+                padding: 1px;
+            }
+            .dual-bet-toolbar-row .filter-group label {
+                font-size: 6.5px;
+            }
+        }
+
+        .streak-summary-box {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .streak-summary-box h4 {
+            margin: 0;
+            font-size: 10px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dual-summary-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 11px;
+            word-break: break-word;
+        }
+
+        .dual-summary-table th, .dual-summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .dual-summary-table th {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+        }
+
+        .dual-summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .dual-summary-table td {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .loading-overlay {
+            font-size: 10px;
+            color: var(--accent-cyan);
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 4px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 15, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container {
+            background: var(--bg-panel);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+            border-radius: 6px;
+            width: 340px; 
+            max-width: 85%;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: scale(0.92);
+            transition: transform 0.2s ease-out;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 13px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .modal-body-grid {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .modal-bets-column {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-bet-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 6px 8px;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.3;
+        }
+
+        .modal-bet-box .title {
+            color: var(--accent-cyan);
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 1px;
+        }
+
+        .modal-target-column {
+            flex: 1;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .modal-target-column .label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .modal-target-column .val {
+            font-size: 17px;
+            font-weight: bold;
+            color: var(--accent-green);
+            margin-top: 2px;
+        }
+
+        .modal-single-box {
+            width: 100%;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .modal-single-box .msg {
+            color: var(--accent-green);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+        }
+
+        .modal-btn-ok {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            padding: 5px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-btn-ok:hover {
+            opacity: 0.85;
+        }
+
+        .optimal-view {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            height: 80vh;
+        }
+
+        .optimal-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+        }
+
+        .optimal-header-bar .btn-raw-data-redirect {
+            background-color: var(--accent-cyan);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .optimal-header-bar .btn-raw-data-redirect:hover {
+            opacity: 0.85;
+        }
+
+        .optimal-view iframe {
+            width: 1000px;
+            flex-grow: 1;
+            height: calc(100% - 40px);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-panel);
+            width: 100%;
+        }
+
+        /* Transparent Watermark for Aviator Live */
+        .aviator-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10vw;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.025);
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    
+    <div class="top-header">
+        <div class="nav-tabs" id="navTabsContainer">
+            <button class="nav-tab-btn" id="tabOverview" onclick="switchView('overview')">Overview</button>
+            <button class="nav-tab-btn" id="tabAnalytics" onclick="switchView('analytics')">Analytics</button>
+            <button class="nav-tab-btn" id="tabRawData" onclick="switchView('rawdata')">Logs</button>
+            <button class="nav-tab-btn" id="tabFilterPL" onclick="switchView('filterpl')">Filter P/L</button>
+            <button class="nav-tab-btn" id="tabOptimal" onclick="switchView('optimal')">Optimal P/L</button>
+            <button class="nav-tab-btn" id="tabRawDataTable" onclick="switchView('rawdatatable')">Raw Data</button>
+        </div>
+    </div>
+
+    <div id="activeAppContainer" style="display: flex; flex-direction: column; gap: 6px; position: relative;">
+        
+        <div class="control-panel" id="overviewControlPanel">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>FROM TIME</label>
+                    <div class="time-triplet">
+                        <select id="fromHour"><option value="">Hour</option></select>
+                        <select id="fromMin"><option value="">Min</option></select>
+                        <select id="fromSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>TO TIME</label>
+                    <div class="time-triplet">
+                        <select id="toHour"><option value="">Hour</option></select>
+                        <select id="toMin"><option value="">Min</option></select>
+                        <select id="toSec"><option value="">Sec</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-filter-row">
+                <div class="filter-group">
+                    <label>DATE</label>
+                    <select id="dateSelect">
+                        <option value="">All Dates</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-reset" onclick="resetFilters()">
+                        Reset Filter
+                    </button>
+                </div>
+
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn-sync" onclick="fetchCSVData()">
+                        Sync
+                    </button>
+                </div>
+            </div>
+
+            <div class="api-controls-section" id="apiControlsSection">
+                <div class="api-left-pairs">
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 1 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount1" value="7" min="0" step="any">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 1 (Min 1.1)</label>
+                            <input type="number" id="targetCashout1" value="1.1" min="1.1" step="any">
+                        </div>
+                    </div>
+                    <div class="api-pair-row">
+                        <div class="filter-group">
+                            <label>INPUT AMOUNT 2 (Min 7 or 0)</label>
+                            <input type="number" id="inputAmount2" value="0" min="0" step="any">
+                        </div>
+                        <div class="filter-group">
+                            <label>TARGET CASHOUT 2 (Min 1.1)</label>
+                            <input type="number" id="targetCashout2" value="0" min="1.1" step="any">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-right-row">
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>TARGET AMOUNT</label>
+                            <input type="number" id="targetReachAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-submit-api" onclick="submitApiValues()">Submit</button>
+                        </div>
+                    </div>
+                    <div class="api-inline-row">
+                        <div class="filter-group">
+                            <label>STOP LOSS</label>
+                            <input type="number" id="stopLossAmount" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn-manual-cashout" onclick="triggerManualCashout()">Manual Cashout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewOverview" style="display: flex; flex-direction: column; gap: 6px; position: relative;">
+            <!-- Transparent Background Watermark for Aviator Live -->
+            <div class="aviator-watermark">SKYDOT Live</div>
+
+            <div class="running-bet-status-bar" id="runningBetStatusBar">
+                <div class="bet-status-row">
+                    <span>Loading bet status...</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-title">Rounds</span>
+                    <span class="metric-value" id="statRounds">-</span>
+                    <span class="metric-sub" id="statDateSub">Date</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Current Balance</span>
+                    <span class="metric-value" id="statCurrentBalance" style="color: var(--accent-cyan);">0.00</span>
+                    <span class="metric-sub">Auto Live (3s)</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Best Strategy</span>
+                    <span class="metric-value" id="statBestStrategy">-</span>
+                    <span class="metric-sub">-</span>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <h4>Top 10 Highest Multipliers Reached</h4>
+                <div class="top-highest-row" id="topHighestContainer">
+                    <div class="no-data" style="grid-column: span 10;">No records loaded yet</div>
+                </div>
+            </div>
+
+            <div class="latest-section">
+                <h3>Latest 24 Values</h3>
+                <div class="latest-rows-container" id="latestRowsContainer">
+                    <div class="no-data">No records loaded yet</div>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <h3>Time-Range Strategy Results</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Strategy Target</th>
+                            <th>Window P/L</th>
+                            <th>Hits</th>
+                        </tr>
+                    </thead>
+                    <tbody id="strategyTableBody">
+                        <tr>
+                            <td colspan="3" class="no-data">No data loaded yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="viewAnalytics" class="analytics-view">
+            <div class="latest-section" style="margin-bottom: 0;">
+                <h3 id="analyticsHeaderTitle">Target Analytics View</h3>
+            </div>
+            <div class="analytics-grid" id="analyticsGridContainer">
+            </div>
+        </div>
+
+        <div id="viewRawData" class="raw-data-view">
+            <div class="logs-filter-toolbar">
+                <div class="dual-bet-toolbar-row">
+                    <div class="filter-group">
+                        <label>DUAL BET 1 AMT</label>
+                        <input type="number" id="dualBet1Amt" value="5" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 1 (x)</label>
+                        <input type="number" id="dualCash1" value="1.5" min="1.1" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL BET 2 AMT</label>
+                        <input type="number" id="dualBet2Amt" value="5" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 2 (x)</label>
+                        <input type="number" id="dualCash2" value="2" min="1.1" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>TARGET AMT</label>
+                        <input type="number" id="dualTargetAmt" value="500" min="0" step="any" oninput="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-reset" onclick="resetDualBetSimulator()">Reset</button>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>HIGHEST STREAK THRESHOLD (e.g. enter 1 for &lt;2.00x, 2 for &lt;3.00x)</label>
+                    <input type="number" id="streakInputFilter" placeholder="Enter number (e.g., 1, 2...)" min="0" step="any" oninput="applyFilters()">
+                </div>
+            </div>
+            
+            <div class="streak-summary-box" id="dualBetSummaryBox" style="display: flex;">
+                <h4>Dual Bet Strategy Cumulative & Peak Analysis</h4>
+                <div class="streak-summary-content" id="dualBetSummaryContent">Enter dual bets above to analyze combined profit/loss and peak performance.</div>
+            </div>
+
+            <div class="streak-summary-box" id="dualBetAllDatesBox" style="display: flex;">
+                <h4>Peak Combined Profit & Drawdown For All Dates</h4>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="dualBetAllDatesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Peak Combined Profit</th>
+                                <th>Peak Profit Time</th>
+                                <th>Max Drawdown Peak</th>
+                                <th>Target Amount Crossed</th>
+                                <th>Max Drawdown Target</th>
+                                <th>Target Cross Time</th>
+                                <th>Target Status</th>
+                                <th>Cumulative Combined P/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dualBetAllDatesBody">
+                            <tr><td colspan="9" class="no-data">Loading data for all dates...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Streak Calculation & Capital Analysis Row above Streak Analysis Summary -->
+            <div class="streak-summary-box" id="streakCalcBox" style="display: flex;">
+                <h4>Streak Calculation & Capital Analysis</h4>
+                <div class="dual-bet-toolbar-row" style="margin-bottom: 6px; border-bottom: none; padding-bottom: 0;">
+                    <div class="filter-group">
+                        <label>BET AMOUNT</label>
+                        <input type="number" id="calcBetAmt" value="10" min="0" step="any">
+                    </div>
+                    <div class="filter-group">
+                        <label>STREAK VALUE</label>
+                        <input type="number" id="calcStreakVal" value="3" min="1" step="1">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-submit-api" onclick="calculateStreakAnalysis()">Submit</button>
+                    </div>
+                </div>
+                <div class="streak-summary-content" id="streakCalcContent">
+                    Enter bet amount and streak value above and click Submit to view calculation.
+                </div>
+            </div>
+
+            <!-- Newly requested table: Peak Combined Profit, Peak Status, Cumulative Combined P/L based on streak logic -->
+            <div class="streak-summary-box" id="streakPeakStatusBox" style="display: flex;">
+                <h4>Peak Combined Profit, Peak Status & Cumulative Combined P/L</h4>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="streakPeakStatusTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Highest Cumulative Profit</th>
+                                <th>Highest Profit Time</th>
+                                <th>Lowest Cumulative Profit</th>
+                                <th>Lowest Cumulative Time</th>
+                                <th>Current/Final Cumulative P/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="streakPeakStatusBody">
+                            <tr><td colspan="6" class="no-data">Calculate streak analysis above to load peak status metrics...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="streak-summary-box" id="streakSummaryBox" style="display: none;">
+                <h4>Streak Analysis Summary</h4>
+                <div class="streak-summary-content" id="streakSummaryContent"></div>
+            </div>
+        </div>
+
+        <!-- Newly Created Filter P/L Page -->
+        <div id="viewFilterPL" class="raw-data-view">
+            <div class="control-panel" style="margin-bottom: 6px;">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>FROM TIME</label>
+                        <div class="time-triplet">
+                            <select id="fpFromHour" onchange="applyFilterPL()"><option value="">Hour</option></select>
+                            <select id="fpFromMin" onchange="applyFilterPL()"><option value="">Min</option></select>
+                            <select id="fpFromSec" onchange="applyFilterPL()"><option value="">Sec</option></select>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>TO TIME</label>
+                        <div class="time-triplet">
+                            <select id="fpToHour" onchange="applyFilterPL()"><option value="">Hour</option></select>
+                            <select id="fpToMin" onchange="applyFilterPL()"><option value="">Min</option></select>
+                            <select id="fpToSec" onchange="applyFilterPL()"><option value="">Sec</option></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="logs-filter-toolbar">
+                <div class="dual-bet-toolbar-row">
+                    <div class="filter-group">
+                        <label>DUAL BET 1 AMT</label>
+                        <input type="number" id="fpDualBet1Amt" value="5" min="0" step="any" oninput="applyFilterPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 1 (x)</label>
+                        <input type="number" id="fpDualCash1" value="1.5" min="1.1" step="any" oninput="applyFilterPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL BET 2 AMT</label>
+                        <input type="number" id="fpDualBet2Amt" value="5" min="0" step="any" oninput="applyFilterPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>DUAL CASH 2 (x)</label>
+                        <input type="number" id="fpDualCash2" value="2" min="1.1" step="any" oninput="applyFilterPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>TARGET AMT</label>
+                        <input type="number" id="fpDualTargetAmt" value="200" min="0" step="any" oninput="applyFilterPL()">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-reset" onclick="resetFilterPLInputs()">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="streak-summary-box" style="display: flex;">
+                <h4>Peak Combined Profit & Drawdown For All Dates with From time to To Time</h4>
+                <div class="streak-summary-content">
+                    <table class="dual-summary-table" id="fpDualBetAllDatesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Peak Combined Profit</th>
+                                <th>Peak Profit Time</th>
+                                <th>Max Drawdown Peak</th>
+                                <th>Target Amount Crossed</th>
+                                <th>Max Drawdown Target</th>
+                                <th>Target Cross Time</th>
+                                <th>Target Status</th>
+                                <th>Cumulative Combined P/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fpDualBetAllDatesBody">
+                            <tr><td colspan="9" class="no-data">Loading data for specific time range across all dates...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete Records Log Page -->
+        <div id="viewRawDataTable" class="raw-data-view">
+            <div class="table-section">
+                <div class="section-header-row">
+                    <h3 id="rawHeaderTitle">Complete Records Log</h3>
+                    <button class="btn-download" onclick="downloadFilteredCSV()">Download CSV</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Round Number</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rawTableBody">
+                        <tr>
+                            <td colspan="4" class="no-data">No records match your selected filter criteria</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="viewOptimal" class="optimal-view">
+            <div class="optimal-header-bar">
+                <span>Optimal P/L Dashboard</span>
+                <button class="btn-raw-data-redirect" onclick="switchView('rawdatatable')">Raw Data</button>
+            </div>
+            <iframe id="optimalIframe" src="profit-loss.html"></iframe>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="customModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modalHeaderTitle">Submission Confirmation</h3>
+        </div>
+        <div class="modal-body-grid" id="modalBodyContainer">
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn-ok" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const AVIATOR_URL = "https://download-aviator-data-latest-f1wq2z.5sc6y6-3.usa-e2.cloudhub.io/downloadSkydot";
+    const CURRENT_BALANCE_URL = "https://fvfjisceoimwilywlztw.supabase.co/rest/v1/rpc/get_latest_balance";
+    const BET_STATUS_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/betStatus";
+    
+    const BASE_API_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas";
+    const MANUAL_CASHOUT_URL = "https://aviator-strategy-proxy-api-f1wq2z.5sc6y6-1.usa-e2.cloudhub.io/lokeshboodas/mannualCashout";
+
+    let currentPlatform = 'aviator';
+    let allRowsData = [];
+    let currentFilteredData = [];
+    let initialLoadDone = false;
+    let availableSortedDates = [];
+
+    function clearApiInputFields() {
+        document.getElementById('inputAmount1').value = '7';
+        document.getElementById('targetCashout1').value = '1.1';
+        document.getElementById('inputAmount2').value = '7';
+        document.getElementById('targetCashout2').value = '1.1';
+        document.getElementById('targetReachAmount').value = '0';
+        document.getElementById('stopLossAmount').value = '0';
+    }
+
+    function resetDualBetSimulator() {
+        document.getElementById('dualBet1Amt').value = '10';
+        document.getElementById('dualCash1').value = '9';
+        document.getElementById('dualBet2Amt').value = '10';
+        document.getElementById('dualCash2').value = '8';
+        document.getElementById('dualTargetAmt').value = '100';
+        applyFilters();
+    }
+
+    function resetFilterPLInputs() {
+        document.getElementById('fpDualBet1Amt').value = '10';
+        document.getElementById('fpDualCash1').value = '20';
+        document.getElementById('fpDualBet2Amt').value = '10';
+        document.getElementById('fpDualCash2').value = '60';
+        document.getElementById('fpDualTargetAmt').value = '500';
+        
+        document.getElementById('fpFromHour').value = "00";
+        document.getElementById('fpFromMin').value = "00";
+        document.getElementById('fpFromSec').value = "00";
+        document.getElementById('fpToHour').value = "23";
+        document.getElementById('fpToMin').value = "59";
+        document.getElementById('fpToSec').value = "59";
+        applyFilterPL();
+    }
+
+    function showSubmitModal(bets, targetAmount) {
+        document.getElementById('modalHeaderTitle').innerText = "Submit Success & DB Updated";
+        const bodyContainer = document.getElementById('modalBodyContainer');
+        
+        let betsHtml = '<div class="modal-bets-column">';
+        bets.forEach(b => {
+            betsHtml += `
+                <div class="modal-bet-box">
+                    <div class="title">${b.title}</div>
+                    <div><strong>Bet:</strong> ${b.amount} &nbsp;|&nbsp; <strong>Target:</strong> ${b.cashout}x</div>
+                </div>
+            `;
+        });
+        betsHtml += '</div>';
+
+        const targetHtml = `
+            <div class="modal-target-column">
+                <span class="label">Target Amount</span>
+                <span class="val">${targetAmount}</span>
+            </div>
+        `;
+
+        bodyContainer.innerHTML = betsHtml + targetHtml;
+        document.getElementById('customModal').classList.add('active');
+    }
+
+    function showManualCashoutModal() {
+        document.getElementById('modalHeaderTitle').innerText = "Manual Cashout";
+        const bodyContainer = document.getElementById('modalBodyContainer');
+
+        bodyContainer.innerHTML = `
+            <div class="modal-single-box">
+                <div class="msg">Manual Cashout triggered || Bet Removed Successfully</div>
+            </div>
+        `;
+
+        document.getElementById('customModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('active');
+    }
+
+    async function fetchCurrentBalance() {
+        try {
+            const response = await fetch(CURRENT_BALANCE_URL, {
+                method: 'POST',
+                headers: {
+                    'apikey': 'sb_publishable_OV2zHzO_WtYIjskzmuDTVg_YmolirNP',
+                    'Authorization': 'Bearer sb_publishable_OV2zHzO_WtYIjskzmuDTVg_YmolirNP',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "p_username": "lokesh" })
+            });
+            if (!response.ok) throw new Error("Network response failed");
+            const data = await response.json();
+            
+            let bal = 0.00;
+            if (Array.isArray(data) && data.length > 0) {
+                bal = data[0].get_latest_balance !== undefined ? data[0].get_latest_balance : data[0];
+            } else if (data && typeof data === 'object') {
+                bal = data.get_latest_balance !== undefined ? data.get_latest_balance : data;
+            } else {
+                bal = data;
+            }
+
+            let formattedBal = "0.00";
+            if (typeof bal === 'number') {
+                formattedBal = bal.toFixed(2);
+            } else if (!isNaN(parseFloat(bal))) {
+                formattedBal = parseFloat(bal).toFixed(2);
+            } else {
+                formattedBal = String(bal);
+            }
+            document.getElementById('statCurrentBalance').innerText = formattedBal;
+        } catch (err) {
+            console.error("Error fetching current balance:", err);
+        }
+    }
+
+    async function fetchBetStatus() {
+        try {
+            const response = await fetch(`${BET_STATUS_URL}?_t=${Date.now()}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+            if (!response.ok) throw new Error("Failed to fetch bet status");
+            const data = await response.json();
+            
+            const statusBarEl = document.getElementById('runningBetStatusBar');
+            if (Array.isArray(data) && data.length > 0) {
+                const item = data[0];
+                const isRunning = item.mannualCashout === true || item.mannualCashout === "true";
+                const statusText = isRunning ? "RUNNING" : "STOPPED";
+                const statusColor = isRunning ? "var(--accent-green)" : "var(--accent-red)";
+
+                statusBarEl.innerHTML = `
+                    <div class="bet-status-row">
+                        <span><strong>Bet1:</strong> amt <strong>${item.inputAmount1}</strong>, target <span style="color: var(--accent-cyan);">${item.cashoutTarget1}x</span></span>
+                        <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                    </div>
+                    <div class="bet-status-row">
+                        <span><strong>Bet2:</strong> amt <strong>${item.inputAmount2}</strong>, target <span style="color: var(--accent-cyan);">${item.cashoutTarget2}x</span></span>
+                        <span>Target: <strong>${item.targetAmount}</strong> &nbsp;|&nbsp; StopLoss: <strong>${item.stopLoss}</strong></span>
+                    </div>
+                `;
+            } else {
+                statusBarEl.innerHTML = `
+                    <div class="bet-status-row">
+                        <span>No active running bets found</span>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error("Error fetching bet status:", err);
+            document.getElementById('runningBetStatusBar').innerHTML = `
+                <div class="bet-status-row">
+                    <span style="color: var(--accent-red);">Error loading active bet status</span>
+                </div>
+            `;
+        }
+    }
+
+    async function submitApiValues() {
+        const amt1 = parseFloat(document.getElementById('inputAmount1').value);
+        const target1 = parseFloat(document.getElementById('targetCashout1').value);
+        const amt2 = parseFloat(document.getElementById('inputAmount2').value);
+        const target2 = parseFloat(document.getElementById('targetCashout2').value);
+        const reachAmt = parseFloat(document.getElementById('targetReachAmount').value) || 0;
+        const stopLossAmt = parseFloat(document.getElementById('stopLossAmount').value) || 0;
+
+        if (isNaN(amt1) || (amt1 !== 0 && amt1 < 7)) {
+            alert("Input Amount 1 must be either 0 or at least 7.");
+            return;
+        }
+        if (isNaN(amt2) || (amt2 !== 0 && amt2 < 7)) {
+            alert("Input Amount 2 must be either 0 or at least 7.");
+            return;
+        }
+        if (amt1 === 0 && amt2 === 0) {
+            alert("Both input amounts cannot be 0 at the same time. At least one bet must be active.");
+            return;
+        }
+        if (amt1 !== 0 && (isNaN(target1) || target1 < 1.1)) {
+            alert("Target Cashout 1 cannot be less than 1.1.");
+            return;
+        }
+        if (amt2 !== 0 && (isNaN(target2) || target2 < 1.1)) {
+            alert("Target Cashout 2 cannot be less than 1.1.");
+            return;
+        }
+
+        const targetUrl = `${BASE_API_URL}/updateBet/${amt1}/${target1}/${amt2}/${target2}/${reachAmt}/${stopLossAmt}`;
+
+        try {
+            await fetch(targetUrl, {
+                method: 'PUT',
+                headers: { 
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+            fetchBetStatus(); 
+        } catch (err) {
+            console.error("Database update network error:", err);
+        }
+
+        const activeBets = [
+            { title: 'Bet 1', amount: amt1, cashout: target1 },
+            { title: 'Bet 2', amount: amt2, cashout: target2 }
+        ];
+
+        showSubmitModal(activeBets, reachAmt);
+        clearApiInputFields();
+    }
+
+    async function triggerManualCashout() {
+        try {
+            await fetch(MANUAL_CASHOUT_URL, {
+                method: 'PUT',
+                headers: { 
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+            fetchBetStatus(); 
+        } catch (err) {
+            console.error("Manual cashout network error:", err);
+        }
+
+        showManualCashoutModal();
+    }
+
+    function parseDateToTimestamp(dateStr) {
+        const cleanDate = dateStr.replace(/\\/g, '').replace(/\//g, '-');
+        const parts = cleanDate.split('-');
+        if (parts.length === 3) {
+            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+        }
+        return 0;
+    }
+
+    function getMultiplierColorClass(val) {
+        if (val >= 10.0) return 'mult-pink';
+        if (val >= 2.0) return 'mult-purple';
+        return 'mult-blue';
+    }
+
+    function initDropdowns() {
+        let hourHtml = '<option value="">Hour</option>';
+        hourHtml += `<option value="00">12 AM</option>`;
+        for (let i = 1; i <= 11; i++) {
+            const h = String(i).padStart(2, '0');
+            hourHtml += `<option value="${h}">${i} AM</option>`;
+        }
+        hourHtml += `<option value="12">12 PM</option>`;
+        for (let i = 1; i <= 11; i++) {
+            const val = i + 12;
+            const h = String(val).padStart(2, '0');
+            hourHtml += `<option value="${h}">${i} PM</option>`;
+        }
+
+        document.getElementById('fromHour').innerHTML = hourHtml;
+        document.getElementById('toHour').innerHTML = hourHtml;
+        document.getElementById('fpFromHour').innerHTML = hourHtml;
+        document.getElementById('fpToHour').innerHTML = hourHtml;
+
+        const minHtml = '<option value="">Min</option>' + Array.from({length: 60}, (_, i) => {
+            const m = String(i).padStart(2, '0');
+            return `<option value="${m}">${m}</option>`;
+        }).join('');
+        document.getElementById('fromMin').innerHTML = minHtml;
+        document.getElementById('toMin').innerHTML = minHtml;
+        document.getElementById('fpFromMin').innerHTML = minHtml;
+        document.getElementById('fpToMin').innerHTML = minHtml;
+
+        const secHtml = '<option value="">Sec</option>' + Array.from({length: 60}, (_, i) => {
+            const s = String(i).padStart(2, '0');
+            return `<option value="${s}">${s}</option>`;
+        }).join('');
+        document.getElementById('fromSec').innerHTML = secHtml;
+        document.getElementById('toSec').innerHTML = secHtml;
+        document.getElementById('fpFromSec').innerHTML = secHtml;
+        document.getElementById('fpToSec').innerHTML = secHtml;
+    }
+
+    function switchView(val) {
+        document.getElementById('tabOverview').classList.toggle('active', val === 'overview');
+        document.getElementById('tabAnalytics').classList.toggle('active', val === 'analytics');
+        document.getElementById('tabRawData').classList.toggle('active', val === 'rawdata');
+        document.getElementById('tabFilterPL').classList.toggle('active', val === 'filterpl');
+        document.getElementById('tabOptimal').classList.toggle('active', val === 'optimal');
+        document.getElementById('tabRawDataTable').classList.toggle('active', val === 'rawdatatable');
+
+        document.getElementById('viewOverview').style.display = val === 'overview' ? 'flex' : 'none';
+        document.getElementById('viewAnalytics').style.display = val === 'analytics' ? 'flex' : 'none';
+        document.getElementById('viewRawData').style.display = val === 'rawdata' ? 'flex' : 'none';
+        document.getElementById('viewFilterPL').style.display = val === 'filterpl' ? 'flex' : 'none';
+        document.getElementById('viewOptimal').style.display = val === 'optimal' ? 'flex' : 'none';
+        document.getElementById('viewRawDataTable').style.display = val === 'rawdatatable' ? 'flex' : 'none';
+
+        const apiSection = document.getElementById('apiControlsSection');
+        const overviewControlPanel = document.getElementById('overviewControlPanel');
+        
+        if (val === 'optimal') {
+            overviewControlPanel.style.display = 'none';
+        } else if (val === 'filterpl') {
+            overviewControlPanel.style.display = 'none';
+        } else {
+            overviewControlPanel.style.display = 'flex';
+            if (val === 'overview') {
+                apiSection.style.display = 'grid';
+            } else {
+                apiSection.style.display = 'none';
+            }
+        }
+
+        if (val === 'filterpl') {
+            applyFilterPL();
+        } else if (val !== 'optimal') {
+            applyFilters();
+        }
+    }
+
+    function resetFilters() {
+        const dateSelect = document.getElementById('dateSelect');
+        
+        if (availableSortedDates.length > 0) {
+            dateSelect.value = availableSortedDates[0];
+        } else {
+            dateSelect.value = "";
+        }
+
+        document.getElementById('fromHour').value = "00";
+        document.getElementById('fromMin').value = "00";
+        document.getElementById('fromSec').value = "00";
+
+        document.getElementById('toHour').value = "23";
+        document.getElementById('toMin').value = "59";
+        document.getElementById('toSec').value = "59";
+
+        applyFilters();
+    }
+
+    async function fetchCSVData() {
+        const targetUrl = AVIATOR_URL;
+        try {
+            const response = await fetch(`${targetUrl}?_t=${Date.now()}`, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch logs");
+
+            const csvText = await response.text();
+            processCSV(csvText);
+        } catch (error) {
+            console.error("Error loading CSV:", error);
+            document.getElementById('topHighestContainer').innerHTML = `<div class="no-data" style="grid-column: span 10; color: var(--accent-red);">Connection error / Failed to load data</div>`;
+        }
+    }
+
+    function processCSV(csvText) {
+        const lines = csvText.trim().split('\n').filter(line => line.length > 0);
+        const rows = lines[0].toLowerCase().includes('date') ? lines.slice(1) : lines;
+
+        allRowsData = [];
+        const uniqueDates = new Set();
+
+        rows.forEach((row, index) => {
+            const parts = row.split(',').map(p => p.trim());
+            if (parts.length >= 3) {
+                let rawDate = parts[0].replace(/\\/g, '');
+                let standardizedDate = rawDate.replace(/\//g, '-');
+                
+                uniqueDates.add(standardizedDate);
+                let foundTime = '-';
+                let foundMultStr = parts[parts.length - 1].replace(/x/gi, '').trim();
+                
+                if (parts[1] && parts[1].includes(':')) {
+                    foundTime = parts[1];
+                    foundMultStr = parts[2].replace(/x/gi, '').trim();
+                } else {
+                    foundMultStr = parts[2].replace(/x/gi, '').trim();
+                }
+
+                let parsedVal = parseFloat(foundMultStr) || 1.0;
+                allRowsData.push({
+                    roundNum: index + 1,
+                    date: standardizedDate,
+                    time: foundTime,
+                    multiplier: parsedVal,
+                    rawMultiplier: foundMultStr.endsWith('x') ? foundMultStr : foundMultStr + 'x',
+                    sortKey: foundTime !== '-' ? parseTimeToSeconds(foundTime) : 0
+                });
+            }
+        });
+
+        availableSortedDates = Array.from(uniqueDates).sort((a, b) => parseDateToTimestamp(b) - parseDateToTimestamp(a));
+
+        const dateSelect = document.getElementById('dateSelect');
+        const currentSelected = dateSelect.value;
+
+        dateSelect.innerHTML = '<option value="">All Dates</option>' + 
+            availableSortedDates.map(d => `<option value="${d}">${d}</option>`).join('');
+
+        if (currentSelected && availableSortedDates.includes(currentSelected)) {
+            dateSelect.value = currentSelected;
+        } else if (!initialLoadDone) {
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
+            initialLoadDone = true;
+        } else {
+            if (availableSortedDates.length > 0) {
+                dateSelect.value = availableSortedDates[0];
+            }
+        }
+
+        applyFilters();
+        if (document.getElementById('viewFilterPL').style.display === 'flex') {
+            applyFilterPL();
+        }
+    }
+
+    function parseTimeToSeconds(timeStr) {
+        const match = timeStr.match(/(\d{2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return 0;
+        let hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const seconds = parseInt(match[3], 10);
+        const ampm = match[4].toUpperCase();
+
+        if (ampm === 'PM' && hours < 12) hours += 12;
+        if (ampm === 'AM' && hours === 12) hours = 0;
+
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    function applyFilterPL() {
+        const fH = document.getElementById('fpFromHour').value;
+        const fM = document.getElementById('fpFromMin').value;
+        const fS = document.getElementById('fpFromSec').value;
+
+        const tH = document.getElementById('fpToHour').value;
+        const tM = document.getElementById('fpToMin').value;
+        const tS = document.getElementById('fpToSec').value;
+
+        let fromSeconds = fH !== '' ? parseInt(fH, 10) * 3600 + (fM !== '' ? parseInt(fM, 10) * 60 : 0) + (fS !== '' ? parseInt(fS, 10) : 0) : null;
+        let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
+
+        const b1Amt = parseFloat(document.getElementById('fpDualBet1Amt').value) || 0;
+        const c1Target = parseFloat(document.getElementById('fpDualCash1').value) || 0;
+        const b2Amt = parseFloat(document.getElementById('fpDualBet2Amt').value) || 0;
+        const c2Target = parseFloat(document.getElementById('fpDualCash2').value) || 0;
+        const userTarget = parseFloat(document.getElementById('fpDualTargetAmt').value) || 0;
+
+        const tbody = document.getElementById('fpDualBetAllDatesBody');
+        if (!tbody) return;
+
+        if (availableSortedDates.length === 0 || allRowsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
+            return;
+        }
+
+        let computedRows = [];
+        let rawDateResults = [];
+
+        availableSortedDates.forEach(dateStr => {
+            const dateRows = allRowsData.filter(item => {
+                if (item.date !== dateStr) return false;
+                if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
+                if (toSeconds !== null && item.sortKey > toSeconds) return false;
+                return true;
+            });
+
+            if (dateRows.length === 0) {
+                rawDateResults.push({ dateStr, isEmpty: true });
+                return;
+            }
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakDateTime = '-';
+            let peakRunningProfits = [];
+            let targetCrossTime = 'Not crossed';
+            let targetCrossDrawdown = 0;
+            let targetCrossAmount = '-';
+            let hasCrossedTarget = false;
+            let runningMin = Infinity;
+
+            dateRows.forEach(item => {
+                let roundProfit = 0;
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+                cumulativeProfit += roundProfit;
+
+                if (cumulativeProfit < runningMin) {
+                    runningMin = cumulativeProfit;
+                }
+
+                peakRunningProfits.push({
+                    dateTime: `${item.time}`,
+                    profit: cumulativeProfit
+                });
+
+                if (!hasCrossedTarget && userTarget > 0 && cumulativeProfit >= userTarget) {
+                    hasCrossedTarget = true;
+                    targetCrossTime = item.time;
+                    targetCrossDrawdown = runningMin;
+                    targetCrossAmount = cumulativeProfit;
+                }
+
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakDateTime = `${item.time}`;
+                }
+            });
+
+            let maxDrawdownAtPeakTime = 0;
+            let peakMin = Infinity;
+            for (let i = 0; i < peakRunningProfits.length; i++) {
+                if (peakRunningProfits[i].profit < peakMin) {
+                    peakMin = peakRunningProfits[i].profit;
+                }
+                if (peakRunningProfits[i].dateTime === peakDateTime) {
+                    maxDrawdownAtPeakTime = peakMin;
+                    break;
+                }
+            }
+
+            let rowObj = {
+                dateStr,
+                peakCombinedProfit,
+                peakDateTime,
+                maxDrawdownAtPeakTime,
+                targetCrossAmount,
+                targetCrossDrawdown,
+                targetCrossTime,
+                hasCrossedTarget,
+                cumulativeProfit,
+                isEmpty: false
+            };
+            computedRows.push(rowObj);
+            rawDateResults.push(rowObj);
+        });
+
+        let peakProfits = computedRows.map(r => r.peakCombinedProfit);
+        let minPeak = peakProfits.length > 0 ? Math.min(...peakProfits) : null;
+        let maxPeak = peakProfits.length > 0 ? Math.max(...peakProfits) : null;
+
+        let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
+        let minDD = drawdowns.length > 0 ? Math.min(...drawdowns) : null;
+        let maxDD = drawdowns.length > 0 ? Math.max(...drawdowns) : null;
+
+        let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
+        let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
+        let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
+
+        let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
+        let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
+        let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
+
+        let cumulativeProfits = computedRows.map(r => r.cumulativeProfit);
+        let minCum = cumulativeProfits.length > 0 ? Math.min(...cumulativeProfits) : null;
+        let maxCum = cumulativeProfits.length > 0 ? Math.max(...cumulativeProfits) : null;
+
+        let html = '';
+
+        rawDateResults.forEach(r => {
+            if (r.isEmpty) {
+                html += `
+                    <tr>
+                        <td><strong>${r.dateStr}</strong></td>
+                        <td colspan="8" class="no-data">No records in selected time range</td>
+                    </tr>
+                `;
+            } else {
+                const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
+                const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
+                const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
+                const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
+                const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
+
+                let peakStr = `${peakSign}${formatAmount(r.peakCombinedProfit)}`;
+                if (r.peakCombinedProfit === minPeak) peakStr += ' (L)';
+                if (r.peakCombinedProfit === maxPeak) peakStr += ' (H)';
+
+                let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
+                if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
+                if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
+
+                let crossAmtStr = '-';
+                if (r.hasCrossedTarget) {
+                    crossAmtStr = `${crossAmtSign}${formatAmount(r.targetCrossAmount)}`;
+                    if (r.targetCrossAmount === minCrossAmt) crossAmtStr += ' (L)';
+                    if (r.targetCrossAmount === maxCrossAmt) crossAmtStr += ' (H)';
+                }
+
+                let crossDDStr = '-';
+                if (r.hasCrossedTarget) {
+                    crossDDStr = `${crossDdSign}${formatAmount(r.targetCrossDrawdown)}`;
+                    if (r.targetCrossDrawdown === minCrossDD) crossDDStr += ' (L)';
+                    if (r.targetCrossDrawdown === maxCrossDD) crossDDStr += ' (H)';
+                }
+
+                let cumStr = `${finalPlSign}${formatAmount(r.cumulativeProfit)}`;
+                if (r.cumulativeProfit === minCum) cumStr += ' (L)';
+                if (r.cumulativeProfit === maxCum) cumStr += ' (H)';
+
+                const statusBadge = r.hasCrossedTarget 
+                    ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
+                    : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
+
+                html += `
+                    <tr>
+                        <td><strong>${r.dateStr}</strong></td>
+                        <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
+                        <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
+                        <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
+                        <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
+                        <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><strong class="${r.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${cumStr}</strong></td>
+                    </tr>
+                `;
+            }
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function calculateStreakAnalysis() {
+        const betAmt = parseFloat(document.getElementById('calcBetAmt').value) || 0;
+        const targetStreak = parseInt(document.getElementById('calcStreakVal').value, 10) || 1;
+        
+        const streakInputVal = document.getElementById('streakInputFilter').value.trim();
+        const n = streakInputVal !== "" ? parseFloat(streakInputVal) : 1;
+        const threshold = 2.00; // Fixed 2.00x cashout target for the requested sequence logic
+
+        let streaks = [];
+        let currentStreak = [];
+
+        currentFilteredData.forEach(item => {
+            if (item.multiplier < threshold) {
+                currentStreak.push(item);
+            } else {
+                if (currentStreak.length > 0) {
+                    streaks.push([...currentStreak]);
+                    currentStreak = [];
+                }
+            }
+        });
+        if (currentStreak.length > 0) {
+            streaks.push([...currentStreak]);
+        }
+
+        const lengthMap = {};
+        streaks.forEach(s => {
+            const len = s.length;
+            if (!lengthMap[len]) {
+                lengthMap[len] = 0;
+            }
+            lengthMap[len]++;
+        });
+
+        const targetCount = lengthMap[targetStreak] || 0;
+        let baseCapital = targetCount * betAmt;
+
+        const higherLengths = Object.keys(lengthMap)
+            .map(Number)
+            .filter(len => len > targetStreak)
+            .sort((a, b) => a - b);
+
+        let deductionRowsHtml = '';
+        let totalDeduction = 0;
+
+        higherLengths.forEach(len => {
+            const count = lengthMap[len];
+            const deduction = count * betAmt;
+            totalDeduction += deduction;
+            deductionRowsHtml += `
+                <tr>
+                    <td><strong>Streak Length ${len} Rounds</strong></td>
+                    <td>${count} occurrences $\times$ ${betAmt}</td>
+                    <td><strong class="negative">-${deduction}</strong></td>
+                </tr>
+            `;
+        });
+
+        const finalNet = baseCapital - totalDeduction;
+
+        const container = document.getElementById('streakCalcContent');
+        
+        let formulaPartsStr = `${baseCapital}`;
+        higherLengths.forEach(len => {
+            const count = lengthMap[len];
+            formulaPartsStr += ` - (${count} $\times$ ${betAmt})`;
+        });
+
+        container.innerHTML = `
+            <table class="dual-summary-table">
+                <thead>
+                    <tr>
+                        <th>Metric / Calculation Step</th>
+                        <th>Details / Breakdown</th>
+                        <th>Result / Capital</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Target Streak (${targetStreak} Rounds)</strong></td>
+                        <td>${targetCount} occurrences $\times$ ${betAmt}</td>
+                        <td><strong class="positive">+${baseCapital}</strong></td>
+                    </tr>
+                    ${deductionRowsHtml}
+                    <tr>
+                        <td><strong>Final Net Calculation</strong></td>
+                        <td>${formulaPartsStr}</td>
+                        <td><strong class="${finalNet >= 0 ? 'positive' : 'negative'}">${finalNet}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+
+        updateStreakPeakStatusTable(betAmt, targetStreak);
+    }
+
+    function updateStreakPeakStatusTable(betAmt, targetStreak) {
+        const tbody = document.getElementById('streakPeakStatusBody');
+        if (!tbody) return;
+
+        if (availableSortedDates.length === 0 || allRowsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="no-data">No data available</td></tr>`;
+            return;
+        }
+
+        let html = '';
+
+        availableSortedDates.forEach(dateStr => {
+            const dateRows = allRowsData.filter(item => item.date === dateStr);
+            if (dateRows.length === 0) return;
+
+            let cumulativeProfit = 0;
+            let currentConsecutiveBelow2 = 0;
+            let waitingForBet = false;
+
+            let peakProfit = -Infinity;
+            let peakTime = '-';
+            let lowestProfit = Infinity;
+            let lowestTime = '-';
+
+            dateRows.forEach(item => {
+                let roundPnl = 0;
+                let didBetThisRound = false;
+
+                if (waitingForBet) {
+                    didBetThisRound = true;
+                    cumulativeProfit -= betAmt;
+                    if (item.multiplier >= 2.00) {
+                        cumulativeProfit += betAmt * 2.00;
+                    }
+                    waitingForBet = false;
+                    currentConsecutiveBelow2 = 0;
+                }
+
+                if (item.multiplier < 2.00) {
+                    currentConsecutiveBelow2++;
+                    if (currentConsecutiveBelow2 === targetStreak) {
+                        waitingForBet = true;
+                    }
+                } else {
+                    currentConsecutiveBelow2 = 0;
+                    waitingForBet = false;
+                }
+
+                if (cumulativeProfit > peakProfit) {
+                    peakProfit = cumulativeProfit;
+                    peakTime = item.time;
+                }
+                if (cumulativeProfit < lowestProfit) {
+                    lowestProfit = cumulativeProfit;
+                    lowestTime = item.time;
+                }
+            });
+
+            if (peakProfit === -Infinity) peakProfit = 0;
+            if (lowestProfit === Infinity) lowestProfit = 0;
+
+            const peakSign = peakProfit >= 0 ? '+' : '';
+            const lowSign = lowestProfit >= 0 ? '+' : '';
+            const finalSign = cumulativeProfit >= 0 ? '+' : '';
+
+            html += `
+                <tr>
+                    <td><strong>${dateStr}</strong></td>
+                    <td><strong class="${peakProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${formatAmount(peakProfit)}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${peakTime}</strong></td>
+                    <td><strong class="${lowestProfit >= 0 ? 'positive' : 'negative'}">${lowSign}${formatAmount(lowestProfit)}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${lowestTime}</strong></td>
+                    <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${finalSign}${formatAmount(cumulativeProfit)}</strong></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function applyFilters() {
+        const selectedDate = document.getElementById('dateSelect').value;
+        const fH = document.getElementById('fromHour').value;
+        const fM = document.getElementById('fromMin').value;
+        const fS = document.getElementById('fromSec').value;
+
+        const tH = document.getElementById('toHour').value;
+        const tM = document.getElementById('toMin').value;
+        const tS = document.getElementById('toSec').value;
+
+        let fromSeconds = fH !== '' ? parseInt(fH, 10) * 3600 + (fM !== '' ? parseInt(fM, 10) * 60 : 0) + (fS !== '' ? parseInt(fS, 10) : 0) : null;
+        let toSeconds = tH !== '' ? parseInt(tH, 10) * 3600 + (tM !== '' ? parseInt(tM, 10) * 60 : 59) + (tS !== '' ? parseInt(tS, 10) : 59) : null;
+
+        currentFilteredData = allRowsData.filter(item => {
+            if (selectedDate && item.date !== selectedDate) return false;
+            if (fromSeconds !== null && item.sortKey < fromSeconds) return false;
+            if (toSeconds !== null && item.sortKey > toSeconds) return false;
+            return true;
+        });
+
+        const isRawDataTabActive = document.getElementById('tabRawData').classList.contains('active');
+        const streakSummaryBox = document.getElementById('streakSummaryBox');
+        const streakSummaryContent = document.getElementById('streakSummaryContent');
+        const dualBetSummaryContent = document.getElementById('dualBetSummaryContent');
+
+        if (isRawDataTabActive) {
+            const b1Amt = parseFloat(document.getElementById('dualBet1Amt').value) || 0;
+            const c1Target = parseFloat(document.getElementById('dualCash1').value) || 0;
+            const b2Amt = parseFloat(document.getElementById('dualBet2Amt').value) || 0;
+            const c2Target = parseFloat(document.getElementById('dualCash2').value) || 0;
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakRoundNum = 0;
+            let peakDateTime = '-';
+
+            let lowestCombinedProfit = Infinity;
+            let lowestRoundNum = 0;
+            let lowestDateTime = '-';
+
+            currentFilteredData.forEach((item, index) => {
+                const roundNum = index + 1;
+                let roundProfit = 0;
+
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+
+                cumulativeProfit += roundProfit;
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakRoundNum = roundNum;
+                    peakDateTime = `${item.date} ${item.time}`;
+                }
+                if (cumulativeProfit < lowestCombinedProfit) {
+                    lowestCombinedProfit = cumulativeProfit;
+                    lowestRoundNum = roundNum;
+                    lowestDateTime = `${item.date} ${item.time}`;
+                }
+            });
+
+            const recommendedTargetAmount = peakCombinedProfit > 0 ? (peakCombinedProfit * 0.85).toFixed(2) : "0.00";
+
+            if (currentFilteredData.length > 0) {
+                const pSign = cumulativeProfit >= 0 ? '+' : '';
+                const peakSign = peakCombinedProfit >= 0 ? '+' : '';
+                const lowestSign = lowestCombinedProfit >= 0 ? '+' : '';
+                
+                dualBetSummaryContent.innerHTML = `
+                    <table class="dual-summary-table">
+                        <tr>
+                            <th>Configuration</th>
+                            <td>Bet 1: <strong>${b1Amt}</strong> (${c1Target}x) | Bet 2: <strong>${b2Amt}</strong> (${c2Target}x)</td>
+                        </tr>
+                        <tr>
+                            <th>Cumulative Combined P/L</th>
+                            <td><strong class="${cumulativeProfit >= 0 ? 'positive' : 'negative'}">${pSign}${cumulativeProfit.toFixed(2)}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Peak Combined Profit</th>
+                            <td><strong class="${peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakSign}${peakCombinedProfit.toFixed(2)}</strong> (Round #${peakRoundNum} at ${peakDateTime})</td>
+                        </tr>
+                        <tr>
+                            <th>Lowest Combined (Drawdown)</th>
+                            <td><strong class="${lowestCombinedProfit >= 0 ? 'positive' : 'negative'}">${lowestSign}${lowestCombinedProfit.toFixed(2)}</strong> (Round #${lowestRoundNum} at ${lowestDateTime})</td>
+                        </tr>
+                        <tr>
+                            <th>Recommended Target | Stop Amount</th>
+                            <td><strong style="color: var(--accent-cyan);">+${recommendedTargetAmount}</strong> ( ${selectedDate || 'all dates combined'} ${peakDateTime})</td>
+                        </tr>
+                    </table>
+                `;
+            } else {
+                dualBetSummaryContent.innerHTML = `<div style="padding: 6px; color: var(--text-muted);">No records match selected filter for dual bet analysis.</div>`;
+            }
+
+            renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target);
+            calculateStreakAnalysis();
+
+            const streakInputVal = document.getElementById('streakInputFilter').value.trim();
+            if (streakInputVal !== "") {
+                const n = parseFloat(streakInputVal);
+                if (!isNaN(n)) {
+                    const threshold = n + 1.0;
+                    let streaks = [];
+                    let currentStreak = [];
+
+                    currentFilteredData.forEach(item => {
+                        if (item.multiplier < threshold) {
+                            currentStreak.push(item);
+                        } else {
+                            if (currentStreak.length > 0) {
+                                streaks.push([...currentStreak]);
+                                currentStreak = [];
+                            }
+                        }
+                    });
+                    if (currentStreak.length > 0) {
+                        streaks.push([...currentStreak]);
+                    }
+
+                    const lengthMap = {};
+                    streaks.forEach(s => {
+                        const len = s.length;
+                        if (!lengthMap[len]) {
+                            lengthMap[len] = {
+                                count: 0,
+                                periods: []
+                            };
+                        }
+                        lengthMap[len].count++;
+                        lengthMap[len].periods.push({
+                            start: `${s[0].date} ${s[0].time}`,
+                            end: `${s[s.length - 1].date} ${s[s.length - 1].time}`,
+                            timestamp: parseDateToTimestamp(s[0].date) + s[0].sortKey
+                        });
+                    });
+
+                    let aggregatedStreaks = Object.keys(lengthMap).map(len => {
+                        return {
+                            length: parseInt(len, 10),
+                            occurrences: lengthMap[len].count,
+                            periods: lengthMap[len].periods
+                        };
+                    });
+
+                    aggregatedStreaks.sort((a, b) => b.length - a.length);
+
+                    if (aggregatedStreaks.length > 0) {
+                        streakSummaryBox.style.display = 'flex';
+                        let summaryHtml = `
+                            <table class="dual-summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Streak Count</th>
+                                        <th>Occurrences</th>
+                                        <th>Period / Timestamp Range</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        const topCount = Math.min(10, aggregatedStreaks.length);
+                        for (let i = 0; i < topCount; i++) {
+                            const item = aggregatedStreaks[i];
+                            const ordinal = (i === 0) ? "Highest" : (i === 1) ? "2nd Highest" : (i === 2) ? "3rd Highest" : `${i+1}th Highest`;
+                            const periodStr = item.periods.map(p => `${p.start} → ${p.end}`).join('<br>');
+                            
+                            summaryHtml += `
+                                <tr>
+                                    <td><strong>${ordinal}</strong></td>
+                                    <td><strong style="color: var(--accent-cyan);">${item.length} rounds</strong></td>
+                                    <td><strong style="color: var(--accent-green);">${item.occurrences} times</strong></td>
+                                    <td>${periodStr}</td>
+                                </tr>
+                            `;
+                        }
+                        summaryHtml += `</tbody></table>`;
+                        streakSummaryContent.innerHTML = summaryHtml;
+                    } else {
+                        streakSummaryBox.style.display = 'flex';
+                        streakSummaryContent.innerHTML = `<table class="dual-summary-table"><tr><td class="no-data">No streaks found matching threshold &lt; ${threshold.toFixed(2)}x</td></tr></table>`;
+                    }
+
+                    currentFilteredData = currentFilteredData.filter(item => item.multiplier < threshold);
+                } else {
+                    streakSummaryBox.style.display = 'none';
+                }
+            } else {
+                streakSummaryBox.style.display = 'none';
+            }
+        } else {
+            streakSummaryBox.style.display = 'none';
+        }
+
+        updateTopHighestDisplay(currentFilteredData);
+        updateDashboardMetrics(currentFilteredData, selectedDate);
+        renderLatestValues(currentFilteredData);
+        renderAnalyticsCards(currentFilteredData, selectedDate);
+        renderRawDataTable(currentFilteredData, selectedDate);
+    }
+
+    function formatAmount(val) {
+        let num = typeof val === 'number' ? val : parseFloat(val);
+        if (isNaN(num)) return val;
+        let fixed = num.toFixed(2);
+        if (fixed.endsWith('.00')) {
+            return fixed.slice(0, -3);
+        }
+        return fixed;
+    }
+
+    function renderDualBetAllDatesTable(b1Amt, c1Target, b2Amt, c2Target) {
+        const tbody = document.getElementById('dualBetAllDatesBody');
+        if (!tbody) return;
+
+        const userTarget = parseFloat(document.getElementById('dualTargetAmt')?.value) || 0;
+
+        if (availableSortedDates.length === 0 || allRowsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No data available for dates</td></tr>`;
+            return;
+        }
+
+        let computedRows = [];
+
+        availableSortedDates.forEach(dateStr => {
+            const dateRows = allRowsData.filter(item => item.date === dateStr);
+            if (dateRows.length === 0) return;
+
+            let cumulativeProfit = 0;
+            let peakCombinedProfit = -Infinity;
+            let peakDateTime = '-';
+            let peakRunningProfits = [];
+            let targetCrossTime = 'Not crossed';
+            let targetCrossDrawdown = 0;
+            let targetCrossAmount = '-';
+            let hasCrossedTarget = false;
+
+            let runningMin = Infinity;
+
+            dateRows.forEach(item => {
+                let roundProfit = 0;
+                if (b1Amt > 0) {
+                    roundProfit -= b1Amt;
+                    if (item.multiplier >= c1Target) {
+                        roundProfit += b1Amt * c1Target;
+                    }
+                }
+                if (b2Amt > 0) {
+                    roundProfit -= b2Amt;
+                    if (item.multiplier >= c2Target) {
+                        roundProfit += b2Amt * c2Target;
+                    }
+                }
+                cumulativeProfit += roundProfit;
+
+                if (cumulativeProfit < runningMin) {
+                    runningMin = cumulativeProfit;
+                }
+
+                peakRunningProfits.push({
+                    dateTime: `${item.time}`,
+                    profit: cumulativeProfit
+                });
+
+                if (!hasCrossedTarget && userTarget > 0 && cumulativeProfit >= userTarget) {
+                    hasCrossedTarget = true;
+                    targetCrossTime = item.time;
+                    targetCrossDrawdown = runningMin;
+                    targetCrossAmount = cumulativeProfit;
+                }
+
+                if (cumulativeProfit > peakCombinedProfit) {
+                    peakCombinedProfit = cumulativeProfit;
+                    peakDateTime = `${item.time}`;
+                }
+            });
+
+            let maxDrawdownAtPeakTime = 0;
+            let peakMin = Infinity;
+            for (let i = 0; i < peakRunningProfits.length; i++) {
+                if (peakRunningProfits[i].profit < peakMin) {
+                    peakMin = peakRunningProfits[i].profit;
+                }
+                if (peakRunningProfits[i].dateTime === peakDateTime) {
+                    maxDrawdownAtPeakTime = peakMin;
+                    break;
+                }
+            }
+
+            computedRows.push({
+                dateStr,
+                peakCombinedProfit,
+                peakDateTime,
+                maxDrawdownAtPeakTime,
+                targetCrossAmount,
+                targetCrossDrawdown,
+                targetCrossTime,
+                hasCrossedTarget,
+                cumulativeProfit
+            });
+        });
+
+        if (computedRows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="no-data">No records available</td></tr>`;
+            return;
+        }
+
+        let peakProfits = computedRows.map(r => r.peakCombinedProfit);
+        let minPeak = Math.min(...peakProfits);
+        let maxPeak = Math.max(...peakProfits);
+
+        let drawdowns = computedRows.map(r => r.maxDrawdownAtPeakTime);
+        let minDD = Math.min(...drawdowns);
+        let maxDD = Math.max(...drawdowns);
+
+        let crossedAmounts = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossAmount);
+        let minCrossAmt = crossedAmounts.length > 0 ? Math.min(...crossedAmounts) : null;
+        let maxCrossAmt = crossedAmounts.length > 0 ? Math.max(...crossedAmounts) : null;
+
+        let crossedDDs = computedRows.filter(r => r.hasCrossedTarget).map(r => r.targetCrossDrawdown);
+        let minCrossDD = crossedDDs.length > 0 ? Math.min(...crossedDDs) : null;
+        let maxCrossDD = crossedDDs.length > 0 ? Math.max(...crossedDDs) : null;
+
+        let cumulativeProfits = computedRows.map(r => r.cumulativeProfit);
+        let minCum = Math.min(...cumulativeProfits);
+        let maxCum = Math.max(...cumulativeProfits);
+
+        let html = '';
+
+        computedRows.forEach(r => {
+            const peakSign = r.peakCombinedProfit >= 0 ? '+' : '';
+            const ddSign = r.maxDrawdownAtPeakTime >= 0 ? '+' : '';
+            const crossDdSign = r.targetCrossDrawdown >= 0 ? '+' : '';
+            const crossAmtSign = (typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0) ? '+' : '';
+            const finalPlSign = r.cumulativeProfit >= 0 ? '+' : '';
+
+            let peakStr = `${peakSign}${formatAmount(r.peakCombinedProfit)}`;
+            if (r.peakCombinedProfit === minPeak) peakStr += ' (L)';
+            if (r.peakCombinedProfit === maxPeak) peakStr += ' (H)';
+
+            let ddStr = `${ddSign}${formatAmount(r.maxDrawdownAtPeakTime)}`;
+            if (r.maxDrawdownAtPeakTime === minDD) ddStr += ' (L)';
+            if (r.maxDrawdownAtPeakTime === maxDD) ddStr += ' (H)';
+
+            let crossAmtStr = '-';
+            if (r.hasCrossedTarget) {
+                crossAmtStr = `${crossAmtSign}${formatAmount(r.targetCrossAmount)}`;
+                if (r.targetCrossAmount === minCrossAmt) crossAmtStr += ' (L)';
+                if (r.targetCrossAmount === maxCrossAmt) crossAmtStr += ' (H)';
+            }
+
+            let crossDDStr = '-';
+            if (r.hasCrossedTarget) {
+                crossDDStr = `${crossDdSign}${formatAmount(r.targetCrossDrawdown)}`;
+                if (r.targetCrossDrawdown === minCrossDD) crossDDStr += ' (L)';
+                if (r.targetCrossDrawdown === maxCrossDD) crossDDStr += ' (H)';
+            }
+
+            let cumStr = `${finalPlSign}${formatAmount(r.cumulativeProfit)}`;
+            if (r.cumulativeProfit === minCum) cumStr += ' (L)';
+            if (r.cumulativeProfit === maxCum) cumStr += ' (H)';
+
+            const statusBadge = r.hasCrossedTarget 
+                ? `<span style="color: var(--accent-green); font-size: 16px; font-weight: bold;">&#10003;</span>` 
+                : `<span style="color: var(--accent-red); font-size: 16px; font-weight: bold;">&#10007;</span>`;
+
+            html += `
+                <tr>
+                    <td><strong>${r.dateStr}</strong></td>
+                    <td><strong class="${r.peakCombinedProfit >= 0 ? 'positive' : 'negative'}">${peakStr}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${r.peakDateTime}</strong></td>
+                    <td><strong class="${r.maxDrawdownAtPeakTime >= 0 ? 'positive' : 'negative'}">${ddStr}</strong></td>
+                    <td><strong class="${typeof r.targetCrossAmount === 'number' && r.targetCrossAmount >= 0 ? 'positive' : 'negative'}">${crossAmtStr}</strong></td>
+                    <td><strong class="${r.targetCrossDrawdown >= 0 ? 'positive' : 'negative'}">${crossDDStr}</strong></td>
+                    <td><strong style="color: var(--accent-cyan);">${r.targetCrossTime}</strong></td>
+                    <td>${statusBadge}</td>
+                    <td><strong class="${r.cumulativeProfit >= 0 ? 'positive' : 'negative'}">${cumStr}</strong></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function updateTopHighestDisplay(dataArray) {
+        const container = document.getElementById('topHighestContainer');
+        container.innerHTML = '';
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data" style="grid-column: span 10;">No data available</div>`;
+            return;
+        }
+
+        const sortedHighest = [...dataArray].sort((a, b) => b.multiplier - a.multiplier).slice(0, 10);
+
+        sortedHighest.forEach(item => {
+            const badge = document.createElement('div');
+            badge.className = 'highest-badge';
+
+            badge.innerHTML = `
+                <span class="mult">${item.rawMultiplier}</span>
+                <span class="time">${item.time}</span>
+            `;
+            container.appendChild(badge);
+        });
+    }
+
+    function renderLatestValues(dataArray) {
+        const container = document.getElementById('latestRowsContainer');
+        container.innerHTML = '';
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data">No records match your selected filter criteria</div>`;
+            return;
+        }
+
+        const latest24 = [...dataArray].reverse().slice(0, 24);
+
+        for (let i = 0; i < latest24.length; i += 8) {
+            const rowChunk = latest24.slice(i, i + 8);
+            const rowEl = document.createElement('div');
+            rowEl.className = 'latest-row';
+
+            rowChunk.forEach(item => {
+                const badge = document.createElement('div');
+                badge.className = 'latest-badge';
+                const colorClass = getMultiplierColorClass(item.multiplier);
+                badge.innerHTML = `
+                    <span class="time">${item.time}</span>
+                    <span class="mult ${colorClass}">${item.rawMultiplier}</span>
+                `;
+                rowEl.appendChild(badge);
+            });
+
+            container.appendChild(rowEl);
+        }
+    }
+
+    function renderRawDataTable(dataArray, selectedDate) {
+        const tbody = document.getElementById('rawTableBody');
+        tbody.innerHTML = '';
+        document.getElementById('rawHeaderTitle').innerText = `Complete Records Log (${selectedDate || 'All Dates'}) - Total: ${dataArray.length}`;
+
+        if (dataArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="no-data">No records match your selected filter criteria</td></tr>`;
+            return;
+        }
+
+        const reversedData = [...dataArray].reverse();
+
+        reversedData.forEach(item => {
+            const tr = document.createElement('tr');
+            const colorClass = getMultiplierColorClass(item.multiplier);
+            tr.innerHTML = `
+                <td><strong>#${item.roundNum}</strong></td>
+                <td>${item.date}</td>
+                <td>${item.time}</td>
+                <td><strong class="${colorClass}">${item.rawMultiplier}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function downloadFilteredCSV() {
+        if (!currentFilteredData || currentFilteredData.length === 0) {
+            alert("No data available to download.");
+            return;
+        }
+
+        let csvContent = "Round Number,Date,Time,Value\n";
+        currentFilteredData.forEach(item => {
+            csvContent += `${item.roundNum},${item.date},${item.time},${item.rawMultiplier}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `aviator_raw_logs_${document.getElementById('dateSelect').value || 'all_dates'}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function simulateDetailedStrategy(dataArray, targetMultiplier, baseBet = 10) {
+        let currentBalance = 0;
+        let firstHitAmt = 0;
+        let firstHitRd = 0;
+        let firstHitDateTime = '-';
+        let hasHit500 = false;
+        let peakProfit = 0;
+        let lowestProfit = 0;
+        let peakRound = 0;
+        let peakDateTime = '-';
+        let lowestRound = 0;
+        let totalRounds = dataArray.length;
+
+        dataArray.forEach((row, index) => {
+            const roundNum = index + 1;
+            currentBalance -= baseBet;
+
+            if (row.multiplier >= targetMultiplier) {
+                const winAmount = baseBet * targetMultiplier;
+                currentBalance += winAmount;
+            }
+
+            if (!hasHit500 && currentBalance >= 500) {
+                hasHit500 = true;
+                firstHitAmt = currentBalance;
+                firstHitRd = roundNum;
+                firstHitDateTime = `${row.date} ${row.time}`;
+            }
+
+            if (currentBalance > peakProfit) {
+                peakProfit = currentBalance;
+                peakRound = roundNum;
+                peakDateTime = `${row.date} ${row.time}`;
+            }
+            if (currentBalance < lowestProfit) {
+                lowestProfit = currentBalance;
+                lowestRound = roundNum;
+            }
+        });
+
+        if (!hasHit500 && totalRounds > 0) {
+            firstHitAmt = currentBalance;
+            firstHitRd = totalRounds;
+        }
+
+        return {
+            finalProfit: currentBalance,
+            totalRounds: totalRounds,
+            hitAmt: firstHitAmt,
+            hitRd: firstHitRd,
+            hitDateTime: firstHitDateTime,
+            peakProfit: peakProfit,
+            peakRound: peakRound,
+            peakDateTime: peakDateTime,
+            lowestProfit: lowestProfit,
+            lowestRound: lowestRound,
+            isReached: hasHit500 || currentBalance >= 500
+        };
+    }
+
+    function simulateStrategy(dataArray, targetMultiplier, baseBet = 10) {
+        const totalRounds = dataArray.length;
+        let hits = 0;
+
+        dataArray.forEach(row => {
+            if (row.multiplier >= targetMultiplier) {
+                hits++;
+            }
+        });
+
+        let totalBet = totalRounds * baseBet;
+        let totalReturn = hits * targetMultiplier * baseBet;
+        let profit = totalReturn - totalBet;
+
+        return {
+            windowPL: profit,
+            hits: hits
+        };
+    }
+
+    function updateDashboardMetrics(dataArray, selectedDate) {
+        document.getElementById('statRounds').innerText = dataArray.length;
+        document.getElementById('statDateSub').innerText = selectedDate || "All Recorded Dates";
+        
+        if (dataArray.length === 0) {
+            document.getElementById('statBestStrategy').innerText = "-";
+            document.getElementById('strategyTableBody').innerHTML = `<tr><td colspan="3" class="no-data">No records match your selected filter criteria</td></tr>`;
+            return;
+        }
+
+        const targets = [1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 15.0, 20.0, 30.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 200.0, 300.0, 350.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0];
+        let strategyResults = [];
+        let bestStrat = "-";
+        let maxProfit = -Infinity;
+
+        targets.forEach(t => {
+            const res = simulateStrategy(dataArray, t, 10);
+            if (res.windowPL > maxProfit) {
+                maxProfit = res.windowPL;
+                bestStrat = `${t.toFixed(0)}x Target`;
+            }
+            strategyResults.push({
+                target: `${t.toFixed(0)}x Target`,
+                ...res
+            });
+        });
+
+        document.getElementById('statBestStrategy').innerText = bestStrat;
+
+        const tbody = document.getElementById('strategyTableBody');
+        tbody.innerHTML = '';
+
+        strategyResults.forEach(strat => {
+            const tr = document.createElement('tr');
+            const wClass = strat.windowPL >= 0 ? 'positive' : 'negative';
+            const wSign = strat.windowPL >= 0 ? '+' : '';
+
+            tr.innerHTML = `
+                <td><strong>${strat.target}</strong></td>
+                <td class="${wClass}">${wSign}${strat.windowPL.toFixed(2)}</td>
+                <td>${strat.hits}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderAnalyticsCards(dataArray, selectedDate) {
+        const container = document.getElementById('analyticsGridContainer');
+        container.innerHTML = '';
+        document.getElementById('analyticsHeaderTitle').innerText = `Target Analytics View (${selectedDate || 'All Dates'}) - Total Rounds: ${dataArray.length}`;
+
+        if (dataArray.length === 0) {
+            container.innerHTML = `<div class="no-data" style="grid-column: span 3;">No records match your selected filter criteria</div>`;
+            return;
+        }
+
+        const keyTargets = [1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000, 2000, 5000, 8000];
+
+        keyTargets.forEach(t => {
+            const res = simulateDetailedStrategy(dataArray, t, 10);
+            const card = document.createElement('div');
+            card.className = 'target-card';
+
+            const hitSign = res.hitAmt >= 0 ? '+' : '';
+            const peakSign = res.peakProfit >= 0 ? '+' : '';
+            const finalSign = res.finalProfit >= 0 ? '+' : '';
+
+            const hitClass = res.hitAmt >= 0 ? 'positive' : 'negative';
+            const peakClass = res.peakProfit >= 0 ? 'positive' : 'negative';
+            const lowestClass = res.lowestProfit >= 0 ? 'positive' : 'negative';
+            const finalClass = res.finalProfit >= 0 ? 'positive' : 'negative';
+
+            const statusBadgeClass = res.isReached ? 'badge-reached' : 'badge-not-reached';
+            const statusBadgeText = res.isReached ? 'REACHED' : 'NOT REACHED';
+
+            card.innerHTML = `
+                <div class="target-card-header">
+                    <span class="target-card-title">${t}x Target</span>
+                    <span class="target-status-badge ${statusBadgeClass}">${statusBadgeText}</span>
+                </div>
+                <div class="target-metrics-rows">
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Hit Amt:</span>
+                        <span class="target-metric-val ${hitClass}">${hitSign}${res.hitAmt}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Hit Rd:</span>
+                        <span class="target-metric-val">#${res.hitRd}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Profit:</span>
+                        <span class="target-metric-val ${peakClass}">${peakSign}${res.peakProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Time & Date:</span>
+                        <span class="target-metric-val" style="font-size: 9px; color: var(--accent-cyan);">${res.peakDateTime}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Peak Round:</span>
+                        <span class="target-metric-val">#${res.peakRound}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Lowest Profit:</span>
+                        <span class="target-metric-val ${lowestClass}">${res.lowestProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Lowest Rd:</span>
+                        <span class="target-metric-val">#${res.lowestRound}</span>
+                    </div>
+                    <div class="target-metric-row" style="border-top: 1px solid var(--border-color); margin-top: 1px; padding-top: 3px;">
+                        <span class="target-metric-label">Final Profit:</span>
+                        <span class="target-metric-val ${finalClass}">${finalSign}${res.finalProfit}</span>
+                    </div>
+                    <div class="target-metric-row">
+                        <span class="target-metric-label">Total Rounds:</span>
+                        <span class="target-metric-val">${res.totalRounds}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    document.querySelectorAll('select').forEach(el => {
+        if(el.id !== 'platformSelect') {
+            el.addEventListener('click', () => {
+                applyFilters();
+            });
+        }
+    });
+
+    initDropdowns();
+    resetFilters();
+    resetFilterPLInputs();
+    fetchCSVData();
+    fetchCurrentBalance();
+    fetchBetStatus();
+
+    setInterval(fetchCSVData, 5000);
+    setInterval(fetchCurrentBalance, 2000);
+    setInterval(fetchBetStatus, 3000); 
+</script>
+
+</body>
+</html>
